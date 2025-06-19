@@ -32,7 +32,7 @@ struct HomeView: View {
                     .shadow(color: Color.black.opacity(0.18), radius: 20, x: 0, y: 8)
                     .overlay(
                         VStack(spacing: 12) {
-                            Text("欢迎来到AI回忆录")
+                            Text("欢迎来到AI人生回忆录")
                                 .font(.title2).bold()
                                 .foregroundColor(.black)
                             Text("记录你的生活点滴，发现家族故事。")
@@ -45,7 +45,7 @@ struct HomeView: View {
                 Button(action: {}) {
                     HStack {
                         Image(systemName: "plus.circle.fill")
-                        Text("添加新回忆")
+                        Text("添加新的回忆")
                             .fontWeight(.semibold)
                     }
                     .padding(.horizontal, 32)
