@@ -27,14 +27,18 @@ struct NewMemoryView: View {
     @State private var userInput: String = ""
     @State private var aiResponse: String = ""
     @State private var isChatFinished: Bool = false
+    @State private var showingTimeLine: Bool = false
     
     // 示例家族成员
     let familyMembers: [FamilyMember] = [
+        FamilyMember(name: "我", gender: .male, generation: 2, parentIds: [], childrenIds: []),
         FamilyMember(name: "爷爷", gender: .male, generation: 0, parentIds: [], childrenIds: []),
         FamilyMember(name: "奶奶", gender: .female, generation: 0, parentIds: [], childrenIds: []),
         FamilyMember(name: "爸爸", gender: .male, generation: 1, parentIds: [], childrenIds: []),
         FamilyMember(name: "妈妈", gender: .female, generation: 1, parentIds: [], childrenIds: []),
-        FamilyMember(name: "我", gender: .male, generation: 2, parentIds: [], childrenIds: [])
+        FamilyMember(name: "大舅", gender: .male, generation: 1, parentIds: [], childrenIds: []),
+        FamilyMember(name: "大姨", gender: .female, generation: 1, parentIds: [], childrenIds: []),
+        FamilyMember(name: "二舅", gender: .male, generation: 1, parentIds: [], childrenIds: [])
     ]
     
     func resetAfter(step: Step) {
@@ -120,27 +124,34 @@ struct NewMemoryView: View {
                     VStack(spacing: 24) {
                         Text("请选择回忆对象")
                             .font(.title2).bold()
-                        HStack(spacing: 20) {
-                            ForEach(familyMembers, id: \ .id) { member in
-                                Button(action: {
-                                    selectedPerson = member
-                                    step = .selectDate
-                                }) {
-                                    VStack {
-                                        Image(systemName: member.gender == .male ? "person.circle.fill" : "person.circle")
-                                            .resizable()
-                                            .frame(width: 48, height: 48)
-                                            .foregroundColor(member.gender == .male ? .blue.opacity(0.7) : .pink.opacity(0.7))
-                                        Text(member.name)
-                                            .font(.system(size: 14))
-                                            .foregroundColor(.black)
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 20) {
+                                ForEach(familyMembers, id: \ .id) { member in
+                                    Button(action: {
+                                        selectedPerson = member
+                                        step = .selectDate
+                                    }) {
+                                        VStack(spacing: 8) {
+                                            Image(systemName: member.gender == .male ? "person.circle.fill" : "person.circle")
+                                                .resizable()
+                                                .frame(width: 48, height: 48)
+                                                .foregroundColor(member.gender == .male ? .blue.opacity(0.7) : .pink.opacity(0.7))
+                                            Text(member.name)
+                                                .font(.system(size: 14))
+                                                .foregroundColor(.black)
+                                                .lineLimit(1)
+                                                .minimumScaleFactor(0.8)
+                                                .frame(height: 20)
+                                        }
+                                        .padding(10)
+                                        .frame(width: 80, height: 100)
+                                        .background(selectedPerson?.id == member.id ? Color.blue.opacity(0.15) : Color.white)
+                                        .cornerRadius(16)
+                                        .shadow(color: .gray.opacity(0.08), radius: 4, x: 0, y: 2)
                                     }
-                                    .padding(10)
-                                    .background(selectedPerson?.id == member.id ? Color.blue.opacity(0.15) : Color.white)
-                                    .cornerRadius(16)
-                                    .shadow(color: .gray.opacity(0.08), radius: 4, x: 0, y: 2)
                                 }
                             }
+                            .padding(.horizontal, 24)
                         }
                     }
                 case .selectDate:
@@ -164,20 +175,19 @@ struct NewMemoryView: View {
                     }
                 case .aiChat:
                     VStack(spacing: 16) {
-                        Text("与AI对话，描述那天发生了什么")
-                            .font(.title2).bold()
                         HStack {
                             Image(systemName: selectedPerson?.gender == .male ? "person.circle.fill" : "person.circle")
                                 .resizable()
                                 .frame(width: 36, height: 36)
                                 .foregroundColor(selectedPerson?.gender == .male ? .blue.opacity(0.7) : .pink.opacity(0.7))
-                            VStack(alignment: .leading) {
-                                Text(selectedPerson?.name ?? "")
-                                    .font(.headline)
+                            VStack(alignment: .center) {
+                                Text("描述那天发生了什么")
+                                    .font(.title2).bold()
                                 Text(selectedDate, style: .date)
                                     .font(.subheadline)
                                     .foregroundColor(.gray)
                             }
+                            Spacer()
                         }
                         .padding(.bottom, 8)
                         // 聊天区
@@ -238,17 +248,70 @@ struct NewMemoryView: View {
                         }
                         // 结构化事件展示
                         if !aiResponse.isEmpty {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("AI结构化结果：")
-                                    .font(.headline)
-                                Text(aiResponse)
-                                    .font(.body)
-                                    .foregroundColor(.blue)
-                                    .padding(10)
-                                    .background(Color.blue.opacity(0.08))
-                                    .cornerRadius(12)
+                            VStack(alignment: .leading, spacing: 12) {
+                                ScrollView {
+                                    VStack(alignment: .leading, spacing: 12) {
+                                        // 解析结构化内容
+                                        let lines = aiResponse.components(separatedBy: "\n")
+                                        ForEach(Array(lines.enumerated()), id: \.offset) { index, line in
+                                            if line.hasPrefix("对象：") || line.hasPrefix("时间：") || line.hasPrefix("内容：") {
+                                                HStack(alignment: .top, spacing: 8) {
+                                                    Text(line.components(separatedBy: "：").first ?? "")
+                                                        .font(.subheadline)
+                                                        .fontWeight(.semibold)
+                                                        .foregroundColor(.purple)
+                                                        .frame(width: 40, alignment: .leading)
+                                                    
+                                                    Text(line.components(separatedBy: "：").dropFirst().joined(separator: "："))
+                                                        .font(.subheadline)
+                                                        .foregroundColor(.black)
+                                                        .multilineTextAlignment(.leading)
+                                                    
+                                                    Spacer()
+                                                }
+                                            } else if !line.isEmpty && !line.hasPrefix("【") && !line.hasSuffix("】") {
+                                                Text(line)
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.black)
+                                                    .padding(.leading, 48)
+                                            }
+                                        }
+                                    }
+                                    .padding(16)
+                                }
+                                .frame(maxHeight: 200)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(Color.purple.opacity(0.05))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 16)
+                                                .stroke(Color.purple.opacity(0.2), lineWidth: 1)
+                                        )
+                                )
+                                
+                                HStack {
+                                    Spacer()
+                                    Button(action: {
+                                        // 保存回忆的逻辑
+                                        showingTimeLine = true
+                                    }) {
+                                        HStack(spacing: 6) {
+                                            Image(systemName: "heart.fill")
+                                                .font(.system(size: 14))
+                                            Text("保存回忆")
+                                                .font(.subheadline)
+                                                .fontWeight(.medium)
+                                        }
+                                        .padding(.horizontal, 20)
+                                        .padding(.vertical, 10)
+                                        .background(Color.purple)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(20)
+                                    }
+                                    Spacer()
+                                }
                             }
-                            .padding(.top, 8)
+                            .padding(.top, 16)
                         }
                     }
                 }
@@ -256,6 +319,11 @@ struct NewMemoryView: View {
             .padding(.horizontal, 24)
             .animation(.easeInOut, value: step)
             Spacer()
+        }
+        .sheet(isPresented: $showingTimeLine) {
+            if let person = selectedPerson {
+                TimeLineView(selectedPerson: person)
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct HomeView: View {
+    @Binding var selectedTab: Int
     @State private var shootingStarX: CGFloat = -100
     @State private var shootingStarY: CGFloat = 80
     @State private var animate = false
@@ -42,7 +43,9 @@ struct HomeView: View {
                     )
                 Spacer()
                 // 底部按钮
-                Button(action: {}) {
+                Button(action: {
+                    selectedTab = 1 // 跳转到"新的回忆"tab
+                }) {
                     HStack {
                         Image(systemName: "plus.circle.fill")
                         Text("添加新的回忆")
@@ -74,5 +77,5 @@ struct ShootingStarView: View {
 }
 
 #Preview {
-    HomeView()
+    HomeView(selectedTab: .constant(0))
 } 
