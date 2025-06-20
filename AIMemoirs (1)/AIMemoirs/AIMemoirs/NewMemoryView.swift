@@ -28,6 +28,7 @@ struct NewMemoryView: View {
     @State private var aiResponse: String = ""
     @State private var isChatFinished: Bool = false
     @State private var showingTimeLine: Bool = false
+    @StateObject private var memoryManager = MemoryManager.shared
     
     // 示例家族成员
     let familyMembers: [FamilyMember] = [
@@ -92,6 +93,63 @@ struct NewMemoryView: View {
         if chatMessages.isEmpty && aiStep == 0 {
             nextAIMessage()
         }
+    }
+    
+    // 生成回忆标题
+    func generateTitle(from content: String) -> String {
+        // 简单的标题生成逻辑
+        let sentences = content.components(separatedBy: ["。", "！", "？", ".", "!", "?"])
+        if let firstSentence = sentences.first, !firstSentence.trimmingCharacters(in: .whitespaces).isEmpty {
+            let trimmed = firstSentence.trimmingCharacters(in: .whitespaces)
+            if trimmed.count > 15 {
+                return String(trimmed.prefix(15)) + "..."
+            } else {
+                return trimmed
+            }
+        }
+        
+        // 如果没有找到合适的句子，使用前20个字符
+        if content.count > 20 {
+            return String(content.prefix(20)) + "..."
+        } else {
+            return content
+        }
+    }
+    
+    // 创建新的回忆事件
+    func createMemoryEvent() {
+        // 从AI结构化结果中提取内容
+        let lines = aiResponse.components(separatedBy: "\n")
+        var content = ""
+        var title = ""
+        
+        for line in lines {
+            if line.hasPrefix("标题：") {
+                title = String(line.dropFirst(3)).trimmingCharacters(in: .whitespaces)
+            } else if line.hasPrefix("内容：") {
+                content = String(line.dropFirst(3)).trimmingCharacters(in: .whitespaces)
+            }
+        }
+        
+        // 如果没有找到内容，使用用户输入的内容
+        if content.isEmpty {
+            content = chatMessages.filter { $0.sender == .user }.map { $0.text }.joined(separator: "\n")
+        }
+        
+        // 如果没有找到标题，生成标题
+        if title.isEmpty {
+            title = generateTitle(from: content)
+        }
+        
+        // 创建新的回忆事件并保存
+        let newEvent = MemoryEvent(
+            personName: selectedPerson?.name ?? "",
+            date: selectedDate,
+            content: content,
+            title: title
+        )
+        
+        memoryManager.addMemoryEvent(newEvent)
     }
     
     var body: some View {
@@ -235,7 +293,8 @@ struct NewMemoryView: View {
                             Button(action: {
                                 // 生成结构化事件
                                 let userContents = chatMessages.filter { $0.sender == .user }.map { $0.text }.joined(separator: "\n")
-                                aiResponse = "【结构化事件】\n对象：\(selectedPerson?.name ?? "")\n时间：\(selectedDate.formatted(date: .long, time: .omitted))\n内容：\n\(userContents)"
+                                let title = generateTitle(from: userContents)
+                                aiResponse = "【结构化事件】\n对象：\(selectedPerson?.name ?? "")\n时间：\(selectedDate.formatted(date: .long, time: .omitted))\n标题：\(title)\n内容：\n\(userContents)"
                             }) {
                                 Text("生成事件")
                                     .font(.subheadline)
@@ -292,7 +351,8 @@ struct NewMemoryView: View {
                                 HStack {
                                     Spacer()
                                     Button(action: {
-                                        // 保存回忆的逻辑
+                                        // 创建新的回忆事件
+                                        createMemoryEvent()
                                         showingTimeLine = true
                                     }) {
                                         HStack(spacing: 6) {

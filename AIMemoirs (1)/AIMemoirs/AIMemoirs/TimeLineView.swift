@@ -1,23 +1,12 @@
 import SwiftUI
 
-// 回忆事件模型
-struct MemoryEvent: Identifiable {
-    let id = UUID()
-    let personName: String
-    let date: Date
-    let content: String
-    let title: String
-}
-
 struct TimeLineView: View {
     let selectedPerson: FamilyMember
     @Environment(\.dismiss) private var dismiss
-    
-    // 示例数据 - 实际应用中应该从数据存储中获取
-    @State private var memoryEvents: [MemoryEvent] = []
+    @StateObject private var memoryManager = MemoryManager.shared
     
     var sortedEvents: [MemoryEvent] {
-        memoryEvents.sorted { $0.date > $1.date } // 越近的时间在越上面
+        memoryManager.getMemoryEvents(for: selectedPerson.name)
     }
     
     var body: some View {
@@ -49,7 +38,7 @@ struct TimeLineView: View {
                                     .fontWeight(.bold)
                                     .foregroundColor(.black)
                                 
-                                Text("共\(memoryEvents.count)个回忆")
+                                Text("共\(memoryManager.getMemoryEvents(for: selectedPerson.name).count)个回忆")
                                     .font(.subheadline)
                                     .foregroundColor(.gray)
                             }
@@ -114,36 +103,8 @@ struct TimeLineView: View {
             }
         }
         .onAppear {
-            loadMemoryEvents()
+            // 数据现在由MemoryManager管理，不需要在这里加载
         }
-    }
-    
-    // 加载回忆事件数据
-    private func loadMemoryEvents() {
-        // 模拟数据 - 实际应用中应该从Core Data或其他数据源获取
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        
-        memoryEvents = [
-            MemoryEvent(
-                personName: selectedPerson.name,
-                date: formatter.date(from: "2024-12-25") ?? Date(),
-                content: "今天是圣诞节，和家人一起装饰圣诞树，收到了很多礼物，特别开心。",
-                title: "圣诞节的快乐时光"
-            ),
-            MemoryEvent(
-                personName: selectedPerson.name,
-                date: formatter.date(from: "2024-11-15") ?? Date(),
-                content: "参加了学校的运动会，在100米跑比赛中获得了第一名，老师和同学们都为我鼓掌。",
-                title: "运动会的胜利"
-            ),
-            MemoryEvent(
-                personName: selectedPerson.name,
-                date: formatter.date(from: "2024-10-01") ?? Date(),
-                content: "国庆节和家人一起去海边玩，看到了美丽的日落，还捡了很多贝壳。",
-                title: "海边的美好时光"
-            )
-        ]
     }
 }
 
