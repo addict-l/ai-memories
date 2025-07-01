@@ -2810,53 +2810,9 @@ struct ProgressIndicatorView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // 精美的标题区域
-            VStack(spacing: 6) {
-                HStack(spacing: 12) {
-                    Image(systemName: "sparkles")
-                        .font(.title3)
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [.cyan, .blue],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .scaleEffect(glowAnimation ? 1.1 : 1.0)
-                        .animation(
-                            Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true),
-                            value: glowAnimation
-                        )
-                    
-                    Text("创建美好回忆")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                    
-                    Image(systemName: "heart.fill")
-                        .font(.title3)
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [.pink, .purple],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .scaleEffect(glowAnimation ? 1.1 : 1.0)
-                        .animation(
-                            Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true).delay(0.5),
-                            value: glowAnimation
-                        )
-                }
-                
-                Text("第 \(step.rawValue + 1) 步：\(step.title)")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(.white.opacity(0.8))
-            }
             
             // 现代化进度指示器
-            HStack(spacing: 12) {
+            HStack(spacing: 16) {
                 ForEach(NewMemoryView.Step.allCases, id: \.rawValue) { s in
                     Button(action: { 
                         let impactFeedback = UIImpactFeedbackGenerator(style: .light)
@@ -2872,17 +2828,17 @@ struct ProgressIndicatorView: View {
                     .disabled(s.rawValue > step.rawValue)
                     
                     if s != .aiChat {
-                        // 现代化连接线
+                        // 简洁连接线
                         ZStack {
-                            RoundedRectangle(cornerRadius: 2)
-                                .fill(Color.white.opacity(0.1))
-                                .frame(height: 4)
+                            RoundedRectangle(cornerRadius: 1.5)
+                                .fill(Color.white.opacity(0.08))
+                                .frame(height: 2)
                             
-                            RoundedRectangle(cornerRadius: 2)
+                            RoundedRectangle(cornerRadius: 1.5)
                                 .fill(
                                     s.rawValue < step.rawValue 
                                         ? LinearGradient(
-                                            colors: [.cyan, .blue],
+                                            colors: [.cyan.opacity(0.8), .blue.opacity(0.6)],
                                             startPoint: .leading,
                                             endPoint: .trailing
                                         )
@@ -2892,52 +2848,19 @@ struct ProgressIndicatorView: View {
                                             endPoint: .trailing
                                         )
                                 )
-                                .frame(height: 4)
+                                .frame(height: 2)
                                 .scaleEffect(x: s.rawValue < step.rawValue ? 1.0 : 0.0, anchor: .leading)
                                 .animation(.spring(response: 0.6, dampingFraction: 0.8), value: step)
                         }
-                        .frame(width: 32)
+                        .frame(width: 28)
                     }
                 }
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, 20)
         }
         .padding(.horizontal, 20)
-        .padding(.vertical, 16)
-        .background(
-            ZStack {
-                // 主背景
-                RoundedRectangle(cornerRadius: 24)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color.black.opacity(0.3),
-                                Color.white.opacity(0.05),
-                                Color.purple.opacity(0.08)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .background(.ultraThinMaterial)
-                
-                // 边框光效
-                RoundedRectangle(cornerRadius: 24)
-                    .stroke(
-                        LinearGradient(
-                            colors: [
-                                Color.white.opacity(0.3),
-                                Color.cyan.opacity(0.2),
-                                Color.blue.opacity(0.1)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1.5
-                    )
-            }
-        )
-        .shadow(color: .black.opacity(0.2), radius: 15, x: 0, y: 8)
+        .padding(.vertical, 20)
+        .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 5)
         .onAppear {
             glowAnimation = true
         }
@@ -2958,17 +2881,17 @@ struct StepIndicator: View {
                     Circle()
                         .fill(
                             RadialGradient(
-                                colors: [stepColor.opacity(0.3), Color.clear],
+                                colors: [stepColor.opacity(0.2), Color.clear],
                                 center: .center,
                                 startRadius: 0,
-                                endRadius: 30
+                                endRadius: 25
                             )
                         )
-                        .frame(width: 60, height: 60)
-                        .scaleEffect(pulseAnimation ? 1.2 : 1.0)
+                        .frame(width: 50, height: 50)
+                        .scaleEffect(pulseAnimation ? 1.15 : 1.0)
                         .opacity(pulseAnimation ? 0.0 : 1.0)
                         .animation(
-                            Animation.easeOut(duration: 1.5).repeatForever(autoreverses: false),
+                            Animation.easeOut(duration: 1.8).repeatForever(autoreverses: false),
                             value: pulseAnimation
                         )
                 }
@@ -2976,16 +2899,16 @@ struct StepIndicator: View {
                 // 主圆圈背景
                 Circle()
                     .fill(backgroundGradient)
-                    .frame(width: 48, height: 48)
+                    .frame(width: 44, height: 44)
                     .overlay(
                         Circle()
-                            .stroke(borderGradient, lineWidth: isActive ? 2 : 1)
+                            .stroke(borderGradient, lineWidth: isActive ? 1.5 : 0.8)
                     )
                     .shadow(
                         color: shadowColor,
-                        radius: isActive ? 12 : 6,
+                        radius: isActive ? 8 : 4,
                         x: 0,
-                        y: isActive ? 6 : 3
+                        y: isActive ? 4 : 2
                     )
                 
                 // 图标或数字
