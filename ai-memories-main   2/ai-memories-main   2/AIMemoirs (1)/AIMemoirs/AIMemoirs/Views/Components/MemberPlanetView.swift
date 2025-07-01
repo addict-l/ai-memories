@@ -14,52 +14,58 @@ struct MemberPlanetView: View {
     
     var body: some View {
         let iconSize = ScreenAdapter.getCurrentConfig().memberIconSize
-        VStack(spacing: 0) {
-            ZStack {
-                // 行星背景
-                planetBackgroundView
-                // 成员图标
-                memberIconView
-                // 高级回忆数字标签
-                memoryCountBadgeView
-                // 高级粒子特效
-                if isHighlighted {
-                    particleEffectsView
-                    haloRingsView
-                }
-                // 选中发光效果
-                if isSelected {
-                    selectedGlowEffectsView
-                }
-                // 能量波纹效果
-                if isHighlighted {
-                    energyWaveEffectsView
-                }
+        ZStack {
+            // 行星背景
+            planetBackgroundView
+            // 成员图标
+            memberIconView
+            // 高级回忆数字标签
+            memoryCountBadgeView
+            // 高级粒子特效
+            if isHighlighted {
+                particleEffectsView
+                haloRingsView
             }
-            .frame(width: iconSize, height: iconSize)
-            .clipped()
-            // 动画
-            .animation(.easeInOut(duration: 0.2), value: isHighlighted)
-            .animation(.spring(response: 0.5, dampingFraction: 0.8), value: isSelected)
-            // 监听高亮
-            .onChange(of: isHighlighted) { highlighted in
-                if highlighted {
-                    withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
-                        haloScale = 1.2
-                        colorShiftPhase = 1.0
-                    }
-                } else {
-                    withAnimation(.easeOut(duration: 0.5)) {
-                        haloScale = 1.0
-                        colorShiftPhase = 0.0
-                    }
-                }
+            // 选中发光效果
+            if isSelected {
+                selectedGlowEffectsView
             }
-            // 名字标签
-            memberNameTagView
-                .padding(.top, 6)
+            // 能量波纹效果
+            if isHighlighted {
+                energyWaveEffectsView
+            }
+            // 名字标签（叠加在icon下半部分，不超出icon范围）
+            Text(member.name)
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(.white)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 3)
+                .background(
+                    Capsule()
+                        .fill(Color.black.opacity(0.8))
+                )
+                .frame(maxWidth: iconSize * 0.85) // 限制标签宽度
+                .offset(y: iconSize * 0.28) // 让标签嵌入icon下半部分（0.25~0.32可微调）
         }
-        .frame(width: iconSize, height: iconSize + 28) // 28为名字标签高度+间距
+        .frame(width: iconSize, height: iconSize) // 只用icon高度
+        .clipped()
+        // 动画
+        .animation(.easeInOut(duration: 0.2), value: isHighlighted)
+        .animation(.spring(response: 0.5, dampingFraction: 0.8), value: isSelected)
+        // 监听高亮
+        .onChange(of: isHighlighted) { highlighted in
+            if highlighted {
+                withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
+                    haloScale = 1.2
+                    colorShiftPhase = 1.0
+                }
+            } else {
+                withAnimation(.easeOut(duration: 0.5)) {
+                    haloScale = 1.0
+                    colorShiftPhase = 0.0
+                }
+            }
+        }
     }
     
     // MARK: - 子视图组件
@@ -297,83 +303,6 @@ struct MemberPlanetView: View {
                 )
                 .frame(width: 55 + CGFloat(waveIndex * 8), height: 55 + CGFloat(waveIndex * 8))
                 .opacity(0.8 - cos(animationPhase * 0.1 + Double(waveIndex) * .pi) * 0.4)
-        }
-    }
-    
-    // 成员名字标签视图
-    private var memberNameTagView: some View {
-        Text(member.name)
-            .font(.system(size: 13, weight: .semibold, design: .rounded))
-            .foregroundStyle(nameTextGradient)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 4)
-            .background(nameTagBackgroundView)
-            .shadow(color: .black.opacity(0.6), radius: 3)
-            // 移除可能影响定位的修饰符
-    }
-    
-    // 名字文字渐变
-    private var nameTextGradient: LinearGradient {
-        if isHighlighted {
-            return LinearGradient(
-                colors: [.yellow, .orange],
-                startPoint: .leading,
-                endPoint: .trailing
-            )
-        } else {
-            return LinearGradient(
-                colors: [.white, .white.opacity(0.9)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        }
-    }
-    
-    // 名字标签背景视图
-    private var nameTagBackgroundView: some View {
-        Capsule()
-            .fill(nameTagBackgroundGradient)
-            .overlay(
-                Capsule()
-                    .stroke(nameTagBorderGradient, lineWidth: isHighlighted ? 1.5 : 1)
-            )
-            .shadow(
-                color: isHighlighted ? .yellow.opacity(0.4) : .black.opacity(0.3),
-                radius: isHighlighted ? 8 : 3
-            )
-    }
-    
-    // 名字标签背景渐变
-    private var nameTagBackgroundGradient: LinearGradient {
-        if isHighlighted {
-            return LinearGradient(
-                colors: [.black.opacity(0.9), .black.opacity(0.7)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        } else {
-            return LinearGradient(
-                colors: [.black.opacity(0.75), .black.opacity(0.6)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        }
-    }
-    
-    // 名字标签边框渐变
-    private var nameTagBorderGradient: LinearGradient {
-        if isHighlighted {
-            return LinearGradient(
-                colors: [.yellow.opacity(0.8), .orange.opacity(0.6)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        } else {
-            return LinearGradient(
-                colors: [.white.opacity(0.35), .white.opacity(0.2)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
         }
     }
     
