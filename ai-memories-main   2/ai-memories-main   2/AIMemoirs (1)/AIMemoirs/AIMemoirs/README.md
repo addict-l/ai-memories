@@ -25,7 +25,6 @@
 
 #### 📁 Memory/
 - **MemoryGalleryView.swift** - 回忆画廊视图
-- **AddMemoryView.swift** - 添加回忆视图
 
 #### 📁 Profile/
 - **MemberProfileCard.swift** - 成员资料卡视图

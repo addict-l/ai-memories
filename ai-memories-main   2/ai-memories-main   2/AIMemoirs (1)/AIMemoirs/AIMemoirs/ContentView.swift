@@ -37,13 +37,13 @@ struct ContentView: View {
                     Text("新的回忆")
                 }
                 .tag(1)
-            FamilyTreeView()
+            FamilyTreeView(selectedTab: $selectedTab)
                 .tabItem {
                     Image(systemName: "tree.fill")
                     Text("家族树")
                 }
                 .tag(2)
-            ProfileView()
+            ProfileView(selectedTab: $selectedTab)
                 .tabItem {
                     Image(systemName: "person.fill")
                     Text("我的")

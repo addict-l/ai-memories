@@ -4,6 +4,7 @@ import SwiftUI
 struct MemberProfileCard: View {
     let member: FamilyMember
     @Binding var isShowing: Bool
+    @Binding var selectedTab: Int
     @State private var animationOffset: CGFloat = 50
     @State private var showMemoryGallery: Bool = false
     @State private var showAddMemorySheet: Bool = false
@@ -95,17 +96,12 @@ struct MemberProfileCard: View {
         .sheet(isPresented: $showMemoryGallery) {
             MemoryGalleryView(member: member, isShowing: $showMemoryGallery)
         }
-        .sheet(isPresented: $showAddMemorySheet) {
-            AddMemoryView(
-                member: member,
-                isShowing: $showAddMemorySheet,
-                onMemoryAdded: {
-                    showSuccessMessage = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                        showSuccessMessage = false
-                    }
-                }
-            )
+        .onChange(of: showAddMemorySheet) { show in
+            if show {
+                // 直接跳转到"新的回忆"标签页
+                selectedTab = 1
+                showAddMemorySheet = false
+            }
         }
     }
     

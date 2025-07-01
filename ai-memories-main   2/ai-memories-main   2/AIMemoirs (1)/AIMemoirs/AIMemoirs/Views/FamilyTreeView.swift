@@ -2,6 +2,7 @@ import SwiftUI
 
 // MARK: - 主视图：星空家族树
 struct FamilyTreeView: View {
+    @Binding var selectedTab: Int
     let familyGraph: FamilyGraph
     @State private var selectedMember: FamilyMember?
     @State private var animationPhase: Double = 0
@@ -20,7 +21,8 @@ struct FamilyTreeView: View {
         Color.purple.opacity(0.7)  // 外轨道 - 第0代 (爷爷奶奶)
     ]
     
-    init() {
+    init(selectedTab: Binding<Int>) {
+        self._selectedTab = selectedTab
         let graph = FamilyGraph()
         
         // 100%匹配图片中的家族成员、轨道、颜色、图标和回忆数
@@ -459,13 +461,9 @@ struct FamilyTreeView: View {
     private var memberProfileOverlay: some View {
         Group {
             if showMemberProfile, let member = selectedMember {
-                MemberProfileCard(member: member, isShowing: $showMemberProfile)
+                MemberProfileCard(member: member, isShowing: $showMemberProfile, selectedTab: $selectedTab)
                     .transition(.opacity.combined(with: .scale(scale: 0.8)))
             }
         }
     }
 }
-
-#Preview {
-    FamilyTreeView()
-} 
