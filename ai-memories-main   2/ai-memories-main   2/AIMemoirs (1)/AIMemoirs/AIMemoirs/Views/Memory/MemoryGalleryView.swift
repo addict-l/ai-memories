@@ -1,4 +1,4 @@
- import SwiftUI
+import SwiftUI
 
 // MARK: - 回忆画廊视图
 struct MemoryGalleryView: View {

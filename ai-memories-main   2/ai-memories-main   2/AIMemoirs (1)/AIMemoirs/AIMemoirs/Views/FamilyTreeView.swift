@@ -25,42 +25,42 @@ struct FamilyTreeView: View {
         // 100%匹配图片中的家族成员、轨道、颜色、图标和回忆数
         let members = [
             // 外轨道 - 第0代
-            FamilyMember(name: "爸爸", gender: .male, generation: 0, position: 0,
-                         parentIds: [], childrenIds: [], profileImages: ["car.fill"],
-                         memoryCount: 18, birthYear: 1962, description: "勤劳的父亲",
-                         loveLevel: 4, specialTrait: "勤劳父亲", planetColor: Color.blue),
-            FamilyMember(name: "姑姑", gender: .female, generation: 0, position: 1,
-                         parentIds: [], childrenIds: [], profileImages: ["wand.and.stars.inverse"],
-                         memoryCount: 15, birthYear: 1968, description: "时尚的姑姑",
-                         loveLevel: 4, specialTrait: "时尚达人", planetColor: Color.pink),
-            FamilyMember(name: "奶奶", gender: .female, generation: 0, position: 2,
+            FamilyMember(name: "爷爷", gender: .male, generation: 0, position: 0,
+                         parentIds: [], childrenIds: [], profileImages: ["bicycle"],
+                         memoryCount: 10, birthYear: 1935, description: "智慧的家族长者",
+                         loveLevel: 5, specialTrait: "家族长者", planetColor: Color.green),            
+            FamilyMember(name: "奶奶", gender: .female, generation: 0, position: 1,
                          parentIds: [], childrenIds: [], profileImages: ["circle.grid.2x1.fill"], // Placeholder
                          memoryCount: 30, birthYear: 1938, description: "慈祥的祖母",
                          loveLevel: 5, specialTrait: "慈祥祖母", planetColor: Color.pink),
 
             // 中轨道 - 第1代
-            FamilyMember(name: "爷爷", gender: .male, generation: 1, position: 0,
-                         parentIds: [], childrenIds: [], profileImages: ["bicycle"],
-                         memoryCount: 10, birthYear: 1935, description: "智慧的家族长者",
-                         loveLevel: 5, specialTrait: "家族长者", planetColor: Color.green),
-            FamilyMember(name: "我", gender: .male, generation: 1, position: 1,
+            FamilyMember(name: "爸爸", gender: .male, generation: 1, position: 0,
+                         parentIds: [], childrenIds: [], profileImages: ["car.fill"],
+                         memoryCount: 18, birthYear: 1962, description: "勤劳的父亲",
+                         loveLevel: 4, specialTrait: "勤劳父亲", planetColor: Color.blue),
+            FamilyMember(name: "妈妈", gender: .female, generation: 2, position: 3,
+                         parentIds: [], childrenIds: [], profileImages: ["house.fill"],
+                         memoryCount: 12, birthYear: 1965, description: "温暖的母亲",
+                         loveLevel: 5, specialTrait: "温暖母亲", planetColor: Color.cyan),                         
+            FamilyMember(name: "姑姑", gender: .female, generation: 1, position: 1,
+                         parentIds: [], childrenIds: [], profileImages: ["wand.and.stars.inverse"],
+                         memoryCount: 15, birthYear: 1968, description: "时尚的姑姑",
+                         loveLevel: 4, specialTrait: "时尚达人", planetColor: Color.pink),
+
+            // 内轨道 - 第2代
+            FamilyMember(name: "我", gender: .male, generation: 2, position: 0,
                          parentIds: [], childrenIds: [], profileImages: ["gamecontroller.fill"],
                          memoryCount: 8, birthYear: 1995, description: "年轻的自己",
                          loveLevel: 4, specialTrait: "年轻自己", planetColor: Color.green),
-            FamilyMember(name: "表姐", gender: .female, generation: 1, position: 2,
+            FamilyMember(name: "表姐", gender: .female, generation: 2, position: 1,
                          parentIds: [], childrenIds: [], profileImages: ["leaf.fill"],
                          memoryCount: 5, birthYear: 1993, description: "亲密的表姐",
-                         loveLevel: 4, specialTrait: "亲密伙伴", planetColor: Color.green),
-
-            // 内轨道 - 第2代
-            FamilyMember(name: "妹妹", gender: .female, generation: 2, position: 0,
+                         loveLevel: 4, specialTrait: "亲密伙伴", planetColor: Color.green),            
+            FamilyMember(name: "妹妹", gender: .female, generation: 2, position: 2,
                          parentIds: [], childrenIds: [], profileImages: ["leaf.fill"],
                          memoryCount: 22, birthYear: 1998, description: "可爱的妹妹",
-                         loveLevel: 4, specialTrait: "可爱妹妹", planetColor: Color.cyan),
-            FamilyMember(name: "妈妈", gender: .female, generation: 2, position: 1,
-                         parentIds: [], childrenIds: [], profileImages: ["house.fill"],
-                         memoryCount: 12, birthYear: 1965, description: "温暖的母亲",
-                         loveLevel: 5, specialTrait: "温暖母亲", planetColor: Color.cyan)
+                         loveLevel: 4, specialTrait: "可爱妹妹", planetColor: Color.cyan)
         ]
         
         members.forEach { graph.addMember($0) }
@@ -86,10 +86,7 @@ struct FamilyTreeView: View {
                     // 顶部标题区域
                     topTitleSection
                         .frame(height: 120)
-                    
-                    // 中间家族成员区域
-                    familyMembersView(geometry: geometry)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    Spacer()
                     
                     // 底部控制区域
                     bottomControlSection
@@ -103,16 +100,13 @@ struct FamilyTreeView: View {
                 
                 // 中心家图标 - 放置在最上层以确保居中
                 centerHomeIcon(center: calculateCenter(geometry: geometry))
+
+                // 中间家族成员区域
+                familyMembersView(geometry: geometry)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
                 // 成员资料卡覆盖层
-                .overlay(
-                    Group {
-                        if showMemberProfile, let member = selectedMember {
-                            MemberProfileCard(member: member, isShowing: $showMemberProfile)
-                                .transition(.opacity.combined(with: .scale(scale: 0.8)))
-                        }
-                    }
-                )
+                memberProfileOverlay
             }
         }
         .onAppear {
@@ -193,7 +187,7 @@ struct FamilyTreeView: View {
                     .shadow(color: .yellow.opacity(0.6), radius: 4)
                 
                 Text("星空家族树")
-                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                    .font(.system(size: ScreenAdapter.getCurrentConfig().titleFontSize, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
                     .shadow(color: .black.opacity(0.5), radius: 2)
             }
@@ -205,7 +199,7 @@ struct FamilyTreeView: View {
                     .foregroundColor(.yellow)
                 
                 Text("轻触星座成员，探索TA的回忆银河")
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.system(size: ScreenAdapter.getCurrentConfig().subtitleFontSize, weight: .medium))
                     .foregroundColor(.white.opacity(0.9))
                 
                 Image(systemName: "star.fill")
@@ -229,21 +223,8 @@ struct FamilyTreeView: View {
     
     // 家族成员视图
     func familyMembersView(geometry: GeometryProxy) -> some View {
-        let center = calculateCenter(geometry: geometry)
-        
-        // 动态计算轨道半径，基于可用空间
-        let availableWidth = geometry.size.width - 40 // 留边距
-        let availableHeight = geometry.size.height - 240 // 减去顶部和底部区域
-        let homeRadius: CGFloat = 35 // home发光圈半径
-        let memberRadius: CGFloat = 32.5 // 人物图标半径
-        let minMargin: CGFloat = 10 // 额外间距
-        let baseRadius = homeRadius + memberRadius + minMargin // 最小轨道半径
-        let maxRadius = min(availableWidth, availableHeight) / 2.2
-        let dynamicRadii = [
-            baseRadius + (maxRadius - baseRadius) * 0.4,  // 内轨道
-            baseRadius + (maxRadius - baseRadius) * 0.65, // 中轨道
-            baseRadius + (maxRadius - baseRadius) * 0.9   // 外轨道
-        ]
+        let center = ScreenAdapter.calculateCenter(geometry: geometry)
+        let dynamicRadii = ScreenAdapter.calculateOrbitRadii(geometry: geometry)
         
         return ZStack {
             // 家族成员 - 按精确位置排列
@@ -271,16 +252,14 @@ struct FamilyTreeView: View {
     
     // 统一的中心点计算 - 确保在屏幕可视中心
     private func calculateCenter(geometry: GeometryProxy) -> CGPoint {
-        // 考虑顶部和底部区域，将中心点放在可视区域的中心
-        let availableHeight = geometry.size.height - 240 // 减去顶部120px和底部120px
-        let centerY = 120 + availableHeight / 2 // 顶部区域高度 + 可用高度的一半
-        
-        return CGPoint(x: geometry.size.width / 2, y: centerY)
+        return ScreenAdapter.calculateCenter(geometry: geometry)
     }
     
     // 中心家图标
     func centerHomeIcon(center: CGPoint) -> some View {
-        ZStack {
+        let config = ScreenAdapter.getCurrentConfig()
+        
+        return ZStack {
             // 外圈发光效果
             Circle()
                 .fill(
@@ -293,20 +272,20 @@ struct FamilyTreeView: View {
                         ],
                         center: .center,
                         startRadius: 5,
-                        endRadius: 35
+                        endRadius: config.homeIconSize / 2
                     )
                 )
-                .frame(width: 70, height: 70)
+                .frame(width: config.homeIconSize + 10, height: config.homeIconSize + 10)
             
             // 家图标背景
             Circle()
                 .fill(.orange)
-                .frame(width: 45, height: 45)
+                .frame(width: config.homeIconSize, height: config.homeIconSize)
                 .shadow(color: .orange.opacity(0.8), radius: 12)
             
             // 家图标
             Image(systemName: "house.fill")
-                .font(.system(size: 22, weight: .bold))
+                .font(.system(size: config.homeIconSize * 0.3, weight: .bold))
                 .foregroundColor(.white)
                 .shadow(color: .black.opacity(0.3), radius: 1)
         }
@@ -315,21 +294,8 @@ struct FamilyTreeView: View {
     
     // 轨道路径视图
     func orbitPathsView(geometry: GeometryProxy) -> some View {
-        let center = calculateCenter(geometry: geometry)
-        
-        // 使用与主视图相同的动态半径计算
-        let availableWidth = geometry.size.width - 40
-        let availableHeight = geometry.size.height - 240
-        let homeRadius: CGFloat = 35 // home发光圈半径
-        let memberRadius: CGFloat = 32.5 // 人物图标半径
-        let minMargin: CGFloat = 10 // 额外间距
-        let baseRadius = homeRadius + memberRadius + minMargin // 最小轨道半径
-        let maxRadius = min(availableWidth, availableHeight) / 2.2
-        let dynamicRadii = [
-            baseRadius + (maxRadius - baseRadius) * 0.4,  // 内轨道
-            baseRadius + (maxRadius - baseRadius) * 0.65, // 中轨道
-            baseRadius + (maxRadius - baseRadius) * 0.9   // 外轨道
-        ]
+        let center = ScreenAdapter.calculateCenter(geometry: geometry)
+        let dynamicRadii = ScreenAdapter.calculateOrbitRadii(geometry: geometry)
         
         return ZStack {
             ForEach(0..<dynamicRadii.count, id: \.self) { index in
@@ -481,6 +447,16 @@ struct FamilyTreeView: View {
         
         // 启动流星动画
         shootingStarManager.startAnimation(duration: 2.0, repeatCount: -1)
+    }
+    
+    // 成员资料卡覆盖层
+    private var memberProfileOverlay: some View {
+        Group {
+            if showMemberProfile, let member = selectedMember {
+                MemberProfileCard(member: member, isShowing: $showMemberProfile)
+                    .transition(.opacity.combined(with: .scale(scale: 0.8)))
+            }
+        }
     }
 }
 

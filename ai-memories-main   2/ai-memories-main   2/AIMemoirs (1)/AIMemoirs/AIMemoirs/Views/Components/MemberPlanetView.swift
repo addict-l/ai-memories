@@ -13,51 +13,53 @@ struct MemberPlanetView: View {
     @State private var colorShiftPhase: Double = 0
     
     var body: some View {
-        ZStack {
-            // 高级粒子特效 - 替代变大效果
-            if isHighlighted {
-                particleEffectsView
-                haloRingsView
+        let iconSize = ScreenAdapter.getCurrentConfig().memberIconSize
+        VStack(spacing: 0) {
+            ZStack {
+                // 行星背景
+                planetBackgroundView
+                // 成员图标
+                memberIconView
+                // 高级回忆数字标签
+                memoryCountBadgeView
+                // 高级粒子特效
+                if isHighlighted {
+                    particleEffectsView
+                    haloRingsView
+                }
+                // 选中发光效果
+                if isSelected {
+                    selectedGlowEffectsView
+                }
+                // 能量波纹效果
+                if isHighlighted {
+                    energyWaveEffectsView
+                }
             }
-            
-            // 选中状态高级发光效果
-            if isSelected {
-                selectedGlowEffectsView
+            .frame(width: iconSize, height: iconSize)
+            .clipped()
+            // 动画
+            .animation(.easeInOut(duration: 0.2), value: isHighlighted)
+            .animation(.spring(response: 0.5, dampingFraction: 0.8), value: isSelected)
+            // 监听高亮
+            .onChange(of: isHighlighted) { highlighted in
+                if highlighted {
+                    withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
+                        haloScale = 1.2
+                        colorShiftPhase = 1.0
+                    }
+                } else {
+                    withAnimation(.easeOut(duration: 0.5)) {
+                        haloScale = 1.0
+                        colorShiftPhase = 0.0
+                    }
+                }
             }
-            
-            // 行星背景 - 使用成员自定义颜色，移除缩放效果
-            planetBackgroundView
-            
-            // 成员图标 - 添加色彩变换效果
-            memberIconView
-            
-            // 高级回忆数字标签
-            memoryCountBadgeView
-            
-            // 能量波纹效果 - 仅在高亮时显示
-            if isHighlighted {
-                energyWaveEffectsView
-            }
-        }
-        .frame(width: 65, height: 65)
-        .overlay(alignment: .bottom) {
+            // 名字标签
             memberNameTagView
+                .padding(.top, 6)
         }
-        .animation(.easeInOut(duration: 0.2), value: isHighlighted)
-        .animation(.spring(response: 0.5, dampingFraction: 0.8), value: isSelected)
-        .onChange(of: isHighlighted) { highlighted in
-            if highlighted {
-                withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
-                    haloScale = 1.2
-                    colorShiftPhase = 1.0
-                }
-            } else {
-                withAnimation(.easeOut(duration: 0.5)) {
-                    haloScale = 1.0
-                    colorShiftPhase = 0.0
-                }
-            }
-        }
+        .frame(width: iconSize, height: iconSize + 28) // 28为名字标签高度+间距
     }
     
     // MARK: - 子视图组件
@@ -111,6 +113,7 @@ struct MemberPlanetView: View {
                 .frame(width: 50 + CGFloat(ringIndex * 8), height: 50 + CGFloat(ringIndex * 8))
                 .opacity(0.6 - Double(ringIndex) * 0.2)
                 .rotationEffect(.degrees(animationPhase * (0.5 + Double(ringIndex) * 0.2)))
+                .allowsHitTesting(false) // 防止影响交互
         }
     }
     
@@ -134,6 +137,7 @@ struct MemberPlanetView: View {
                 .frame(width: 60, height: 60)
                 .blur(radius: 6)
                 .rotationEffect(.degrees(animationPhase * 0.3))
+                .allowsHitTesting(false) // 防止影响交互
             
             // 外层脉冲光环
             Circle()
@@ -151,12 +155,16 @@ struct MemberPlanetView: View {
                 )
                 .frame(width: 65, height: 65)
                 .opacity(0.5 + sin(animationPhase * 0.06) * 0.3)
+                .allowsHitTesting(false) // 防止影响交互
         }
     }
     
     // 行星背景视图
     private var planetBackgroundView: some View {
-        Circle()
+        let config = ScreenAdapter.getCurrentConfig()
+        let iconSize = config.memberIconSize
+        
+        return Circle()
             .fill(
                 RadialGradient(
                     colors: [
@@ -166,9 +174,10 @@ struct MemberPlanetView: View {
                     ],
                     center: UnitPoint(x: 0.25, y: 0.25),
                     startRadius: 5,
-                    endRadius: 40
+                    endRadius: iconSize / 2
                 )
             )
+            .frame(width: iconSize, height: iconSize)
             .shadow(color: getEnhancedColor().opacity(0.8), radius: 15)
             .overlay(
                 Circle()
@@ -300,8 +309,7 @@ struct MemberPlanetView: View {
             .padding(.vertical, 4)
             .background(nameTagBackgroundView)
             .shadow(color: .black.opacity(0.6), radius: 3)
-            .padding(.top, 8)
-            .offset(y: isHighlighted ? sin(animationPhase * 0.08) * 2 : 0)
+            // 移除可能影响定位的修饰符
     }
     
     // 名字文字渐变
