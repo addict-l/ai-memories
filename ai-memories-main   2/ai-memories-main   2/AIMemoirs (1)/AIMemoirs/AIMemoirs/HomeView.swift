@@ -2,25 +2,27 @@ import SwiftUI
 
 struct HomeView: View {
     @Binding var selectedTab: Int
-    @State private var shootingStarX: CGFloat = -100
-    @State private var shootingStarY: CGFloat = 80
-    @State private var animate = false
+    @StateObject private var shootingStarManager = ShootingStarManager()
     @State private var buttonPressed = false
     @State private var cardPressed = false
+    
     var body: some View {
         ZStack {
             // 渐变夜空背景
             LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.8), Color.purple.opacity(0.7), Color.black]), startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
-            // 流星动画
-            ShootingStarView(x: shootingStarX, y: shootingStarY)
-                .opacity(0.6)
-                .onAppear {
-                    withAnimation(Animation.linear(duration: 2.0).repeatForever(autoreverses: false)) {
-                        shootingStarX = 500
-                        shootingStarY = 400
-                    }
-                }
+            
+            // 流星动画 - 使用简单样式
+            ShootingStarView(
+                x: shootingStarManager.shootingStarX, 
+                y: shootingStarManager.shootingStarY,
+                style: .simple,
+                rotation: -25
+            )
+            .opacity(0.6)
+            .onAppear {
+                shootingStarManager.startAnimation(duration: 2.0, repeatCount: -1)
+            }
             VStack(spacing: 60) {
                 Spacer().frame(height: 80)
                 
@@ -130,18 +132,9 @@ struct HomeView: View {
                 Spacer().frame(height: 100)
             }
         }
-    }
-}
-
-struct ShootingStarView: View {
-    var x: CGFloat
-    var y: CGFloat
-    var body: some View {
-        Capsule()
-            .fill(LinearGradient(gradient: Gradient(colors: [Color.white, Color.white.opacity(0)]), startPoint: .leading, endPoint: .trailing))
-            .frame(width: 100, height: 3)
-            .rotationEffect(.degrees(-25))
-            .position(x: x, y: y)
+        .onDisappear {
+            shootingStarManager.stopAnimation()
+        }
     }
 }
 
