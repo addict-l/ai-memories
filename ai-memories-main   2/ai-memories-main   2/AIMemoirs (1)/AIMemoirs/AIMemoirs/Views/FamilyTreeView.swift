@@ -10,6 +10,7 @@ struct FamilyTreeView: View {
     @State private var showMemberProfile: Bool = false // 控制资料卡显示
     @StateObject private var shootingStarManager = ShootingStarManager()
     @State private var isPaused: Bool = false // 控制动画暂停
+    @State private var pausedAnimationPhase: Double = 0 // 记录暂停时的动画相位
     
     // 根据图片精确配置轨道 - 适配屏幕尺寸
     private let orbitRadii: [CGFloat] = [70, 110, 150]
@@ -334,11 +335,15 @@ struct FamilyTreeView: View {
                 isActive: isPaused
             ) {
                 withAnimation(.easeInOut(duration: 0.3)) {
-                    isPaused.toggle()
                     if isPaused {
-                        shootingStarManager.stopAnimation()
-                    } else {
+                        // 继续动画
+                        isPaused = false
                         shootingStarManager.startAnimation(duration: 2.0, repeatCount: -1)
+                    } else {
+                        // 暂停动画，记录当前相位
+                        pausedAnimationPhase = animationPhase
+                        isPaused = true
+                        shootingStarManager.stopAnimation()
                     }
                 }
             }
@@ -425,7 +430,8 @@ struct FamilyTreeView: View {
         }
         
         // 添加动画旋转 - 围绕home键中心进行圆周运动
-        let animationAngle = isPaused ? 0 : CGFloat(animationPhase * orbitSpeed * 0.005)
+        let currentPhase = isPaused ? pausedAnimationPhase : animationPhase
+        let animationAngle = CGFloat(currentPhase * orbitSpeed * 0.005)
         let finalAngle = baseAngle + animationAngle
         
         // 计算人物图标中心点位置
