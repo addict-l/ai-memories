@@ -2364,37 +2364,10 @@ struct NewMemoryView: View {
                 VStack(spacing: 0) {
                     // 顶部导航栏
                     HStack {
-                        Button(action: handleBackAction) {
-                            HStack(spacing: 8) {
-                                Image(systemName: step == .selectPerson ? "xmark" : "chevron.left")
-                                    .font(.system(size: 16, weight: .medium))
-                                
-                                if step != .selectPerson {
-                                    Text("返回")
-                                        .font(.system(size: 16, weight: .medium))
-                                }
-                            }
-                            .foregroundColor(.primary)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(
-                                Capsule()
-                                    .fill(.ultraThinMaterial)
-                                    .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
-                            )
-                        }
-                        
                         Spacer()
-                        
-                        Button(action: { isShowingNewMemory = false }) {
-                            Image(systemName: "xmark.circle.fill")
-                                .font(.system(size: 24))
-                                .foregroundColor(.secondary)
-                        }
                     }
                     .padding(.horizontal, 16)
                     .padding(.bottom, 2)
-                    .padding(.top, max(1, geometry.safeAreaInsets.top))
                     
                     // 顶部进度指示
                     ProgressIndicatorView(step: step, onStepSelected: handleStepChange)
@@ -2836,7 +2809,7 @@ struct ProgressIndicatorView: View {
     @State private var glowAnimation = false
     
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 0) {
             // 精美的标题区域
             VStack(spacing: 6) {
                 HStack(spacing: 12) {
