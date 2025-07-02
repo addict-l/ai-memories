@@ -74,42 +74,43 @@ struct ProfileView: View {
                         }
                     }
                 
-                // 主内容区域
-                ScrollViewReader { scrollProxy in
-                    ScrollView(.vertical, showsIndicators: false) {
-                        LazyVStack(spacing: 0, pinnedViews: []) {
-                            // 顶部安全区域占位 - 增加额外空间避免灵动岛遮挡
-                            Color.clear
-                                .frame(height: max(geometry.safeAreaInsets.top + 20, 70))
-                                .id("top")
-                            
-                            VStack(spacing: 0) {
-                                // 个人信息卡片 - 增加顶部边距
-                                profileCardView
-                                    .padding(.top, 40)
-                                    .padding(.horizontal, 20)
-                                
-                                // 统计信息
-                                statisticsView
-                                    .padding(.horizontal, 20)
-                                    .padding(.top, 32)
-                                
-                                // 底部安全区域 + 导航栏高度 - 增加高度确保完全覆盖
-                                Color.clear
-                                    .frame(height: geometry.safeAreaInsets.bottom + 200)
-                            }
-                            .background(
-                                GeometryReader { scrollGeometry in
+                VStack(spacing: 12) {
+                    Spacer()
+                    // 顶部标题区域，移除frame限制，只在外部加padding
+                    profileTopTitleSection(geometry)
+                        .padding(.top, geometry.safeAreaInsets.top + 60)
+                        .padding(.bottom, 10)
+                    Spacer()
+                    // 主内容区域
+                    ScrollViewReader { scrollProxy in
+                        ScrollView(.vertical, showsIndicators: false) {
+                            LazyVStack(spacing: 12, pinnedViews: []) {
+                                VStack(spacing: 12) {
+                                    // 个人信息卡片 - 移除标题区域
+                                    // profileCardView
+                                    //     .padding(.top, 0)
+                                    //     .padding(.horizontal, 20)
+                                    // 统计信息
+                                    statisticsView
+                                        .padding(.horizontal, 20)
+                                        .padding(.top, 32)
+                                    // 底部安全区域 + 导航栏高度 - 增加高度确保完全覆盖
                                     Color.clear
-                                        .preference(key: ScrollOffsetPreferenceKey.self, 
-                                                    value: scrollGeometry.frame(in: .named("scroll")).minY)
+                                        .frame(height: geometry.safeAreaInsets.bottom + 200)
                                 }
-                            )
+                                .background(
+                                    GeometryReader { scrollGeometry in
+                                        Color.clear
+                                            .preference(key: ScrollOffsetPreferenceKey.self, 
+                                                        value: scrollGeometry.frame(in: .named("scroll")).minY)
+                                    }
+                                )
+                            }
                         }
-                    }
-                    .coordinateSpace(name: "scroll")
-                    .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
-                        scrollOffset = value
+                        .coordinateSpace(name: "scroll")
+                        .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
+                            scrollOffset = value
+                        }
                     }
                 }
                 
@@ -322,42 +323,6 @@ struct ProfileView: View {
         )
     }
     
-    // 个人信息卡片
-    var profileCardView: some View {
-        VStack(spacing: 28) {
-            // 标题区域 - 增强设计，增加垂直间距
-            HStack {
-                profileTitleSection
-                
-                Spacer()
-                
-                // 编辑按钮放在标题右侧
-                Button {
-                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                        showEditProfile = true
-                    }
-                } label: {
-                    glassEditButton
-                }
-                .scaleEffect(showEditProfile ? 0.95 : 1.0)
-                .animation(.spring(response: 0.3), value: showEditProfile)
-            }
-            .padding(.horizontal, 24)
-            .padding(.top, 16) // 增加顶部内边距
-            
-            // 主要个人信息 - 增强设计
-            VStack(spacing: 28) {
-                // 头像和基本信息
-                profileHeaderView
-                
-                // 详细信息
-                profileDetailsView
-            }
-            .padding(28)
-            .background(profileCardBackground)
-        }
-    }
-    
     // 个人信息头部
     var profileHeaderView: some View {
         VStack(spacing: 20) {
@@ -371,21 +336,7 @@ struct ProfileView: View {
     
     // 资料卡标题区域
     var profileTitleSection: some View {
-        HStack(spacing: 16) {
-            profileTitleIcon
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text("我的星空档案")
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                    .shadow(color: .black.opacity(0.5), radius: 2)
-                
-                Text("Personal Starfield Profile")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.white.opacity(0.6))
-                    .italic()
-            }
-        }
+        EmptyView() // 已移除，防止卡片内重复标题
     }
     
     // 标题图标
@@ -4571,6 +4522,90 @@ struct ProfileView: View {
                 .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
                 .opacity(configuration.isPressed ? 0.8 : 1.0)
                 .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
+        }
+    }
+    
+    // 新增：顶部标题区域，模仿FamilyTreeView的topTitleSection
+    func profileTopTitleSection(_ geometry: GeometryProxy) -> some View {
+        VStack(spacing: 12) {
+            HStack {
+                // 左侧透明占位，与右侧按钮等宽
+                glassEditButton
+                    .opacity(0)
+                    .frame(width: 38, height: 38)
+                Spacer()
+                // 标题
+                HStack(spacing: 12) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(.yellow)
+                        .shadow(color: .yellow.opacity(0.6), radius: 4)
+                    Text("我的星空档案")
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .shadow(color: .black.opacity(0.5), radius: 2)
+                }
+                Spacer()
+                // 右侧编辑按钮
+                Button {
+                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                        showEditProfile = true
+                    }
+                } label: {
+                    glassEditButton
+                }
+                .scaleEffect(showEditProfile ? 0.95 : 1.0)
+                .animation(.spring(response: 0.3), value: showEditProfile)
+            }
+            HStack(spacing: 8) {
+                Image(systemName: "star.fill")
+                    .font(.system(size: 14))
+                    .foregroundColor(.yellow)
+                Text("记录属于你的星空故事")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.white.opacity(0.9))
+                Image(systemName: "star.fill")
+                    .font(.system(size: 14))
+                    .foregroundColor(.yellow)
+            }
+            .padding(.horizontal, 24)
+            .padding(.vertical, 10)
+            .background(
+                Capsule()
+                    .fill(.white.opacity(0.12))
+                    .overlay(
+                        Capsule()
+                            .stroke(.white.opacity(0.25), lineWidth: 1)
+                    )
+            )
+        }
+    }
+
+      
+    // 个人信息卡片
+    var profileCardView: some View {
+        VStack(spacing: 28) {
+            // 标题区域 - 增强设计，增加垂直间距
+            HStack {
+                profileTitleSection
+                
+                Spacer()
+                
+
+            }
+            .padding(.horizontal, 24)
+            .padding(.top, 16) // 增加顶部内边距
+            
+            // 主要个人信息 - 增强设计
+            VStack(spacing: 28) {
+                // 头像和基本信息
+                profileHeaderView
+                
+                // 详细信息
+                profileDetailsView
+            }
+            .padding(28)
+            .background(profileCardBackground)
         }
     }
 
